@@ -1,25 +1,23 @@
 
 const formulario = document.getElementById("formularioAccion");
-const titulo = document.getElementById("titulo");
-const categoria = document.getElementById("categoria");
-const descripcion = document.getElementById("descripcion");
-const fecha = document.getElementById("fecha");
-const propuesto = document.getElementById("propuesto");
-const resultado = document.getElementById("resultado");
-
+const contenedor = document.getElementById("contenedorAcciones");
+const busqueda = document.getElementById("busqueda");
 const btnGuardar = document.getElementById("btnGuardar");
 const btnCancelar = document.getElementById("btnCancelar");
-const contenedorAcciones = document.getElementById("contenedorAcciones");
-const busqueda = document.getElementById("busqueda");
 
-const totalAcciones = document.getElementById("totalAcciones");
-const totalAgua = document.getElementById("totalAgua");
-const totalOtras = document.getElementById("totalOtras");
+const campos = {
+    titulo: document.getElementById("titulo"),
+    categoria: document.getElementById("categoria"),
+    descripcion: document.getElementById("descripcion"),
+    fecha: document.getElementById("fecha"),
+    propuesto: document.getElementById("propuesto"),
+    resultado: document.getElementById("resultado")
+};
 
 let acciones = [];
 let editandoId = null;
 
-async function consultarAPI(url, opciones = {}) {
+async function api(url, opciones = {}) {
     const respuesta = await fetch(url, {
         ...opciones,
         headers: {
@@ -28,7 +26,7 @@ async function consultarAPI(url, opciones = {}) {
         }
     });
 
-    const datos = await respuesta.json().catch(() => ({}));
+    const datos = await respuesta.json();
 
     if (!respuesta.ok) {
         throw new Error(datos.error || "Ocurrió un error.");
@@ -39,208 +37,155 @@ async function consultarAPI(url, opciones = {}) {
 
 async function cargarAcciones() {
     try {
-        acciones = await consultarAPI("/api/acciones");
+        acciones = await api("/api/acciones");
         mostrarAcciones();
         actualizarResumen();
     } catch (error) {
         console.error(error);
-        alert("No se pudieron cargar las acciones. Revisa tu conexión.");
+        contenedor.textContent =
+            "No se pudieron cargar las acciones. Intenta recargar la página.";
     }
 }
 
+function agregarParrafo(tarjeta, etiqueta, valor) {
+    if (!valor) return;
+
+    const p = document.createElement("p");
+    const strong = document.createElement("strong");
+
+    strong.textContent = etiqueta;
+    p.append(strong, document.createTextNode(valor));
+    tarjeta.appendChild(p);
+}
+
 function mostrarAcciones() {
-    if (!contenedorAcciones) return;
+    contenedor.replaceChildren();
 
-    const texto = (busqueda?.value || "").toLowerCase().trim();
+    const texto = busqueda.value.toLowerCase().trim();
 
-    const filtradas = acciones.filter(accion => {
-        const contenido = [
-            accion.titulo,
-            accion.categoria,
-            accion.descripcion,
-            accion.propuesto,
-            accion.resultado
-        ].join(" ").toLowerCase();
-
-        return contenido.includes(texto);
-    });
-
-    contenedorAcciones.replaceChildren();
+    const filtradas = acciones.filter(a =>
+        [a.titulo, a.categoria, a.descripcion, a.propuesto, a.resultado]
+            .join(" ")
+            .toLowerCase()
+            .includes(texto)
+    );
 
     if (filtradas.length === 0) {
-        const mensaje = document.createElement("p");
-        mensaje.textContent = texto
+        contenedor.textContent = texto
             ? "No se encontraron acciones."
             : "Todavía no hay acciones registradas.";
-        contenedorAcciones.appendChild(mensaje);
         return;
     }
 
-    filtradas.forEach(accion => {
+    filtradas.forEach(a => {
         const tarjeta = document.createElement("article");
         tarjeta.className = "tarjeta-accion";
 
-        const encabezado = document.createElement("h3");
-        encabezado.textContent = accion.titulo;
-        tarjeta.appendChild(encabezado);
+        const titulo = document.createElement("h3");
+        titulo.textContent = a.titulo;
+        tarjeta.appendChild(titulo);
 
-        const categoriaTexto = document.createElement("p");
-        categoriaTexto.textContent = "Categoría: " + accion.categoria;
-        tarjeta.appendChild(categoriaTexto);
-
-        if (accion.descripcion) {
-            agregarTexto(tarjeta, "Descripción: ", accion.descripcion);
-        }
-
-        if (accion.fecha) {
-            agregarTexto(tarjeta, "Fecha: ", accion.fecha);
-        }
-
-        if (accion.propuesto) {
-            agregarTexto(tarjeta, "Propuesto por: ", accion.propuesto);
-        }
-
-        if (accion.resultado) {
-            agregarTexto(tarjeta, "Resultado: ", accion.resultado);
-        }
+        agregarParrafo(tarjeta, "Categoría: ", a.categoria);
+        agregarParrafo(tarjeta, "Descripción: ", a.descripcion);
+        agregarParrafo(tarjeta, "Fecha: ", a.fecha);
+        agregarParrafo(tarjeta, "Propuesto por: ", a.propuesto);
+        agregarParrafo(tarjeta, "Resultado: ", a.resultado);
 
         const botones = document.createElement("div");
         botones.className = "botones-accion";
 
         const editar = document.createElement("button");
-        editar.type = "button";
         editar.textContent = "Editar";
-        editar.addEventListener("click", () => prepararEdicion(accion));
+        editar.type = "button";
+        editar.addEventListener("click", () => prepararEdicion(a));
 
         const eliminar = document.createElement("button");
-        eliminar.type = "button";
         eliminar.textContent = "Eliminar";
-        eliminar.addEventListener("click", () => eliminarAccion(accion.id));
+        eliminar.type = "button";
+        eliminar.addEventListener("click", () => eliminarAccion(a.id));
 
         botones.append(editar, eliminar);
         tarjeta.appendChild(botones);
-        contenedorAcciones.appendChild(tarjeta);
+        contenedor.appendChild(tarjeta);
     });
 }
 
-function agregarTexto(contenedor, etiqueta, valor) {
-    const parrafo = document.createElement("p");
-    const negrita = document.createElement("strong");
-
-    negrita.textContent = etiqueta;
-    parrafo.append(negrita, document.createTextNode(valor));
-    contenedor.appendChild(parrafo);
-}
-
 function actualizarResumen() {
-    if (totalAcciones) {
-        totalAcciones.textContent = acciones.length;
-    }
+    document.getElementById("totalAcciones").textContent = acciones.length;
 
-    const cantidadAgua = acciones.filter(accion =>
-        (accion.categoria || "").toLowerCase() === "agua"
+    const agua = acciones.filter(a =>
+        (a.categoria || "").toLowerCase() === "agua"
     ).length;
 
-    if (totalAgua) {
-        totalAgua.textContent = cantidadAgua;
-    }
-
-    if (totalOtras) {
-        totalOtras.textContent = acciones.length - cantidadAgua;
-    }
+    document.getElementById("totalAgua").textContent = agua;
+    document.getElementById("totalOtras").textContent =
+        acciones.length - agua;
 }
 
-function prepararEdicion(accion) {
-    editandoId = accion.id;
+function prepararEdicion(a) {
+    editandoId = a.id;
 
-    titulo.value = accion.titulo || "";
-    categoria.value = accion.categoria || "";
-    descripcion.value = accion.descripcion || "";
-    fecha.value = accion.fecha || "";
-    propuesto.value = accion.propuesto || "";
-    resultado.value = accion.resultado || "";
+    Object.keys(campos).forEach(clave => {
+        campos[clave].value = a[clave] || "";
+    });
 
-    if (btnGuardar) btnGuardar.textContent = "Actualizar acción";
-    if (btnCancelar) btnCancelar.hidden = false;
-
-    formulario?.scrollIntoView({ behavior: "smooth", block: "start" });
+    btnGuardar.textContent = "Actualizar acción";
+    btnCancelar.hidden = false;
+    formulario.scrollIntoView({ behavior: "smooth" });
 }
 
 function limpiarFormulario() {
-    formulario?.reset();
+    formulario.reset();
     editandoId = null;
-
-    if (btnGuardar) btnGuardar.textContent = "Guardar acción";
-    if (btnCancelar) btnCancelar.hidden = true;
+    btnGuardar.textContent = "Guardar acción";
+    btnCancelar.hidden = true;
 }
 
-async function guardarAccion(evento) {
+formulario.addEventListener("submit", async evento => {
     evento.preventDefault();
 
-    const datos = {
-        titulo: titulo.value.trim(),
-        categoria: categoria.value,
-        descripcion: descripcion.value.trim(),
-        fecha: fecha.value,
-        propuesto: propuesto.value.trim(),
-        resultado: resultado.value.trim()
-    };
-
-    if (!datos.titulo || !datos.categoria) {
-        alert("Escribe el título y selecciona una categoría.");
-        return;
-    }
+    const datos = {};
+    Object.keys(campos).forEach(clave => {
+        datos[clave] = campos[clave].value.trim();
+    });
 
     try {
-        if (btnGuardar) btnGuardar.disabled = true;
+        btnGuardar.disabled = true;
 
         if (editandoId !== null) {
-            // La ruta PUT se agregará al backend para habilitar la edición.
-            throw new Error(
-                "La edición todavía no está habilitada en el servidor. " +
-                "Por ahora puedes cancelar y registrar una acción nueva."
-            );
+            alert("La edición aún no está habilitada en el servidor.");
+            return;
         }
 
-        await consultarAPI("/api/acciones", {
+        await api("/api/acciones", {
             method: "POST",
             body: JSON.stringify(datos)
         });
 
         limpiarFormulario();
         await cargarAcciones();
-        alert("¡Acción guardada en Neon correctamente!");
+        alert("¡Acción guardada en Neon!");
     } catch (error) {
         console.error(error);
-        alert(error.message || "No se pudo guardar la acción.");
+        alert(error.message);
     } finally {
-        if (btnGuardar) btnGuardar.disabled = false;
+        btnGuardar.disabled = false;
     }
-}
+});
+
+btnCancelar.addEventListener("click", limpiarFormulario);
+busqueda.addEventListener("input", mostrarAcciones);
 
 async function eliminarAccion(id) {
-    if (!confirm("¿Seguro que deseas eliminar esta acción?")) {
-        return;
-    }
+    if (!confirm("¿Quieres eliminar esta acción?")) return;
 
     try {
-        await consultarAPI(`/api/acciones/${id}`, {
-            method: "DELETE"
-        });
-
+        await api(`/api/acciones/${id}`, { method: "DELETE" });
         await cargarAcciones();
-        alert("Acción eliminada correctamente.");
     } catch (error) {
         console.error(error);
-        alert(error.message || "No se pudo eliminar la acción.");
+        alert(error.message);
     }
 }
 
-formulario?.addEventListener("submit", guardarAccion);
-btnCancelar?.addEventListener("click", limpiarFormulario);
-busqueda?.addEventListener("input", mostrarAcciones);
-
-if (btnCancelar) btnCancelar.hidden = true;
-
 cargarAcciones();
-
