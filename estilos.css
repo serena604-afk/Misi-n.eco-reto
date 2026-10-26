@@ -1,0 +1,652 @@
+
+/* MISION ECO-RETO - ESTILOS COMPLETOS */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --verde: #087f5b;
+    --verde-oscuro: #064e3b;
+    --verde-claro: #e7f7ec;
+    --fondo: #f2f8f3;
+    --texto: #20352b;
+    --gris: #66756c;
+    --borde: #dce8df;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--fondo);
+    color: var(--texto);
+    line-height: 1.6;
+}
+
+/* ENCABEZADO */
+
+.encabezado {
+    background: linear-gradient(135deg, #064e3b, #159765);
+    color: white;
+    padding: 28px 18px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.logo {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: #c8f169;
+    color: #064e3b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.encabezado h1 {
+    font-size: 27px;
+    line-height: 1.25;
+}
+
+.encabezado p {
+    font-size: 14px;
+}
+
+.lema {
+    max-width: 900px;
+    margin: 20px auto 0;
+    color: #e0f6e8;
+}
+
+/* CONTENIDO PRINCIPAL */
+
+.contenedor {
+    width: 92%;
+    max-width: 900px;
+    margin: 24px auto;
+}
+
+h2 {
+    font-size: 23px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+}
+
+p {
+    overflow-wrap: anywhere;
+}
+
+/* BIENVENIDA */
+
+.bienvenida {
+    padding: 28px 24px;
+    background: white;
+    border-radius: 18px;
+    border: 1px solid var(--borde);
+    border-top: 5px solid #46ad70;
+    box-shadow: 0 5px 18px #163d2510;
+}
+
+.etiqueta {
+    display: inline-block;
+    color: var(--verde);
+    background: var(--verde-claro);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.bienvenida p {
+    color: var(--gris);
+    margin: 10px 0;
+}
+
+/* BOTONES */
+
+button {
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 18px;
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: var(--verde-oscuro);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #8bd6a6;
+    outline-offset: 2px;
+}
+
+/* TARJETAS DE RESUMEN */
+
+.resumen {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.tarjeta-resumen {
+    padding: 17px 13px;
+    border-radius: 15px;
+    min-width: 0;
+}
+
+.tarjeta-resumen p {
+    font-size: 13px;
+    margin: 8px 0 4px;
+}
+
+.tarjeta-resumen strong {
+    display: block;
+    font-size: 30px;
+    line-height: 1.3;
+}
+
+.simbolo {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.verde {
+    background: #dcf7e4;
+    color: #17683b;
+}
+
+.azul {
+    background: #dceffd;
+    color: #155783;
+}
+
+.amarillo {
+    background: #fff1c9;
+    color: #79530b;
+}
+
+/* PANELES */
+
+.panel {
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 17px;
+    padding: 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 14px #163d2509;
+}
+
+.titulo-seccion {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 20px;
+}
+
+.titulo-seccion h2 {
+    margin: 0 0 5px;
+}
+
+.titulo-seccion p {
+    color: var(--gris);
+    font-size: 14px;
+}
+
+.numero {
+    background: var(--verde-claro);
+    color: var(--verde);
+    border-radius: 12px;
+    padding: 11px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* FORMULARIOS */
+
+label {
+    display: block;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin-top: 7px;
+    padding: 13px;
+    border: 1px solid #cbd9ce;
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--texto);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #89968d;
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--verde);
+}
+
+.botones-formulario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.botones-formulario button {
+    flex: 1;
+}
+
+.boton-secundario {
+    background: #e9efeb;
+    color: #294738;
+}
+
+.boton-secundario:hover {
+    background: #d7e3da;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.mensaje {
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* LISTA DE ACCIONES */
+
+.lista-acciones {
+    margin-top: 18px;
+}
+
+.accion {
+    border: 1px solid var(--borde);
+    border-left: 5px solid #35a766;
+    border-radius: 13px;
+    padding: 17px;
+    margin-top: 14px;
+    background: #fbfefb;
+    overflow-wrap: anywhere;
+}
+
+.accion h3 {
+    color: var(--verde-oscuro);
+    font-size: 19px;
+    margin-bottom: 9px;
+}
+
+.accion p {
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.accion .categoria {
+    display: inline-block;
+    background: var(--verde-claro);
+    color: var(--verde-oscuro);
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.acciones-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.acciones-botones button {
+    margin-top: 0;
+    padding: 11px 15px;
+}
+
+.acciones-botones .boton-editar {
+    background: #1769aa;
+}
+
+.acciones-botones .boton-editar:hover {
+    background: #104e80;
+}
+
+.acciones-botones .boton-eliminar {
+    background: #c93643;
+}
+
+.acciones-botones .boton-eliminar:hover {
+    background: #a31e2a;
+}
+
+.vacio {
+    text-align: center;
+    padding: 24px 12px;
+    color: var(--gris);
+    background: #f7faf7;
+    border-radius: 12px;
+}
+
+/* CONSEJO ECOLÓGICO */
+
+.consejo {
+    background: #e2f5e5;
+    border: 1px solid #c6e9cf;
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 24px;
+}
+
+.consejo h2 {
+    color: var(--verde-oscuro);
+}
+
+.consejo p {
+    font-size: 14px;
+}
+
+/* PIE DE PÁGINA */
+
+footer {
+    text-align: center;
+    background: #123d32;
+    color: #e1f4e7;
+    padding: 24px 15px;
+    font-size: 13px;
+}
+
+footer p + p {
+    margin-top: 5px;
+}
+
+/* ADAPTACIÓN A CELULARES */
+
+@media (max-width: 480px) {
+    .encabezado {
+        padding: 23px 15px;
+    }
+
+    .encabezado h1 {
+        font-size: 23px;
+    }
+
+    .marca {
+        gap: 11px;
+    }
+
+    .logo {
+        width: 49px;
+        height: 49px;
+        font-size: 19px;
+    }
+
+    .contenedor {
+        width: 94%;
+        margin: 16px auto;
+    }
+
+    .bienvenida,
+    .panel {
+        padding: 18px;
+    }
+
+    .bienvenida h2 {
+        font-size: 22px;
+    }
+
+    .resumen {
+        gap: 7px;
+    }
+
+    .tarjeta-resumen {
+        padding: 12px 8px;
+    }
+
+    .tarjeta-resumen p {
+        font-size: 11px;
+    }
+
+    .tarjeta-resumen strong {
+        font-size: 25px;
+    }
+
+    .titulo-seccion {
+        gap: 10px;
+    }
+
+    .titulo-seccion h2 {
+        font-size: 19px;
+    }
+
+    .titulo-seccion p {
+        font-size: 12px;
+    }
+
+    .botones-formulario {
+        flex-direction: column;
+    }
+
+    .botones-formulario button {
+        width: 100%;
+    }
+
+    .acciones-botones button {
+        flex: 1;
+    }
+}
+
+/* CORRECCIONES PARA CELULAR */
+
+.encabezado {
+    overflow: hidden;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.marca > div:last-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.marca h1 {
+    font-size: 25px;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.marca p {
+    font-size: 14px;
+    overflow-wrap: break-word;
+}
+
+.logo {
+    flex: 0 0 49px;
+    width: 49px;
+    height: 49px;
+}
+
+.encabezado h1 {
+    overflow-wrap: anywhere;
+}
+
+.logo {
+    flex-shrink: 0;
+}
+
+.resumen {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+}
+
+.tarjeta-resumen {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.tarjeta-resumen strong {
+    font-size: clamp(18px, 5vw, 30px);
+    overflow-wrap: anywhere;
+}
+
+.tarjeta-resumen p {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+    .encabezado {
+        padding: 20px 14px;
+    }
+
+    .marca {
+        gap: 9px;
+    }
+
+    .encabezado h1 {
+        font-size: 21px;
+    }
+
+    .lema {
+        margin-top: 12px;
+    }
+
+    .resumen {
+        gap: 8px;
+    }
+
+    .tarjeta-resumen {
+        padding: 12px 8px;
+    }
+
+    .tarjeta-resumen p {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .tarjeta-resumen strong {
+        font-size: 20px;
+    }
+}
+
+/* AJUSTE FINAL DEL ENCABEZADO Y LAS TARJETAS */
+
+body {
+    overflow-x: hidden;
+}
+
+.encabezado {
+    width: 100%;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+.marca > div:last-child {
+    min-width: 0;
+    flex: 1;
+}
+
+.logo {
+    width: 49px;
+    height: 49px;
+    flex: 0 0 49px;
+}
+
+.resumen {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+}
+
+.tarjeta-resumen {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.tarjeta-resumen strong {
+    font-size: 19px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.tarjeta-resumen p {
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 380px) {
+    .resumen {
+        gap: 5px;
+    }
+
+    .tarjeta-resumen {
+        padding: 9px 6px;
+    }
+
+    .tarjeta-resumen strong {
+        font-size: 17px;
+    }
+}

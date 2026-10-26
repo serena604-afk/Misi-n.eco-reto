@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misión Eco-Reto</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <header class="encabezado">
+        <div class="marca">
+            <div class="logo"</div>
+            <div>
+                <h1>Misión Eco-Reto</h1>
+                <p>Pequeñas acciones, grandes cambios</p>
+            </div>
+        </div>
+        <p class="lema">Cada acción cuenta para cuidar nuestro planeta.</p>
+    </header>
+
+    <main class="contenedor">
+
+        <section class="bienvenida">
+            <span class="etiqueta">PROYECTO ECOLÓGICO</span>
+            <h2>¡Bienvenido a tu misión!</h2>
+            <p>Registra tus acciones, consulta tus avances
+                y descubre cómo puedes ayudar al medio ambiente.</p>
+            <button type="button" id="btnComenzar">
+                Registrar una acción
+            </button>
+        </section>
+
+        <section class="resumen">
+            <div class="tarjeta-resumen verde">
+                <span class="simbolo">+</span>
+                <p>Acciones registradas</p>
+                <strong id="totalAcciones">0</strong>
+            </div>
+
+            <div class="tarjeta-resumen azul">
+                <span class="simbolo">AGUA</span>
+                <p>Acciones de agua</p>
+                <strong id="totalAgua">0</strong>
+            </div>
+
+            <div class="tarjeta-resumen amarillo">
+                <span class="simbolo">ECO</span>
+                <p>Otras acciones</p>
+                <strong id="totalOtras">0</strong>
+            </div>
+        </section>
+
+        <section class="panel registro" id="seccionRegistro">
+            <div class="titulo-seccion">
+                <span class="numero">01</span>
+                <div>
+                    <h2 id="tituloFormulario">Registrar acción ecológica</h2>
+                    <p>Completa los datos de tu actividad.</p>
+                </div>
+            </div>
+
+            <form id="formularioAccion">
+
+                <label for="titulo">Nombre de la acción</label>
+                <input type="text" id="titulo" maxlength="80"
+                    placeholder="Ej. Separar botellas de plástico"
+                    required>
+
+                <label for="categoria">Categoría</label>
+                <select id="categoria" required>
+                    <option value="">Selecciona una categoría</option>
+                    <option value="Reciclaje">Reciclaje</option>
+                    <option value="Agua">Ahorro de agua</option>
+                    <option value="Energia">Ahorro de energía</option>
+                    <option value="Naturaleza">Cuidado de la naturaleza</option>
+                    <option value="Reutilizacion">Reutilización</option>
+                    <option value="Transporte">Transporte ecológico</option>
+                </select>
+
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" maxlength="500"
+                    placeholder="Describe lo que hiciste y cómo ayuda al planeta."
+                    required></textarea>
+
+                <label for="fecha">Fecha de la acción</label>
+                <input type="date" id="fecha" required>
+
+                <label for="propuesto">Nombre del estudiante</label>
+                <input type="text" id="propuesto" maxlength="100"
+                    placeholder="Escribe tu nombre"
+                    required>
+
+                <div class="botones-formulario">
+                    <button type="submit" id="btnGuardar">
+                        Guardar acción
+                    </button>
+                    <button type="button" id="btnCancelar"
+                        class="boton-secundario" hidden>
+                        Cancelar edición
+                    </button>
+                </div>
+
+                <p id="resultado" class="mensaje" role="status"></p>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="titulo-seccion">
+                <span class="numero">02</span>
+                <div>
+                    <h2>Mis acciones ecológicas</h2>
+                    <p>Consulta, edita o elimina tus registros.</p>
+                </div>
+            </div>
+
+            <label for="busqueda">Buscar acción</label>
+            <input type="search" id="busqueda"
+                placeholder="Escribe el nombre o la categoría">
+
+            <div id="contenedorAcciones" class="lista-acciones"></div>
+        </section>
+
+        <section class="consejo">
+            <h2>Consejo ecológico</h2>
+            <p>Antes de tirar algo, piensa si puedes reutilizarlo
+                o reciclarlo. Los pequeños cambios también ayudan.</p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Misión Eco-Reto | Proyecto de Serena de programación</p>
+        <p>Pequeñas acciones, grandes cambios.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
