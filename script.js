@@ -1,252 +1,246 @@
 
-function mostrarMensaje() {
-    const mensaje = document.getElementById("mensaje");
-
-    if (mensaje) {
-        mensaje.textContent =
-            "¡Bienvenido a tu misión ecológica!";
-    }
-}
-
 const formulario = document.getElementById("formularioAccion");
-const contenedor = document.getElementById("contenedorAcciones");
-const total = document.getElementById("totalAcciones");
+const titulo = document.getElementById("titulo");
+const categoria = document.getElementById("categoria");
+const descripcion = document.getElementById("descripcion");
+const fecha = document.getElementById("fecha");
+const propuesto = document.getElementById("propuesto");
 const resultado = document.getElementById("resultado");
 
-let acciones = JSON.parse(
-    localStorage.getItem("accionesEcoReto") || "[]"
-);
+const btnGuardar = document.getElementById("btnGuardar");
+const btnCancelar = document.getElementById("btnCancelar");
+const contenedorAcciones = document.getElementById("contenedorAcciones");
+const busqueda = document.getElementById("busqueda");
 
-let indiceEdicion = null;
+const totalAcciones = document.getElementById("totalAcciones");
+const totalAgua = document.getElementById("totalAgua");
+const totalOtras = document.getElementById("totalOtras");
 
-function guardarAcciones() {
-    localStorage.setItem(
-        "accionesEcoReto",
-        JSON.stringify(acciones)
-    );
+let acciones = [];
+let editandoId = null;
+
+async function consultarAPI(url, opciones = {}) {
+    const respuesta = await fetch(url, {
+        ...opciones,
+        headers: {
+            "Content-Type": "application/json",
+            ...(opciones.headers || {})
+        }
+    });
+
+    const datos = await respuesta.json().catch(() => ({}));
+
+    if (!respuesta.ok) {
+        throw new Error(datos.error || "Ocurrió un error.");
+    }
+
+    return datos;
 }
 
-function actualizarEstadisticas() {
-    const agua = acciones.filter(function(accion) {
-        return accion.categoria === "Agua";
-    }).length;
-
-    const otras = acciones.length - agua;
-
-    const totalAgua = document.getElementById("totalAgua");
-    const totalOtras = document.getElementById("totalOtras");
-
-    if (totalAgua) totalAgua.textContent = agua;
-    if (totalOtras) totalOtras.textContent = otras;
+async function cargarAcciones() {
+    try {
+        acciones = await consultarAPI("/api/acciones");
+        mostrarAcciones();
+        actualizarResumen();
+    } catch (error) {
+        console.error(error);
+        alert("No se pudieron cargar las acciones. Revisa tu conexión.");
+    }
 }
 
 function mostrarAcciones() {
-    if (!contenedor || !total) return;
+    if (!contenedorAcciones) return;
 
-    contenedor.innerHTML = "";
-    total.textContent =
-        "Acciones registradas: " + acciones.length;
+    const texto = (busqueda?.value || "").toLowerCase().trim();
 
-    actualizarEstadisticas();
+    const filtradas = acciones.filter(accion => {
+        const contenido = [
+            accion.titulo,
+            accion.categoria,
+            accion.descripcion,
+            accion.propuesto,
+            accion.resultado
+        ].join(" ").toLowerCase();
 
-    if (acciones.length === 0) {
-        contenedor.textContent =
-            "Aún no has registrado acciones.";
-        return;
-    }
+        return contenido.includes(texto);
+    });
 
-    const buscador = document.getElementById("buscarAccion");
-    const texto = buscador
-        ? buscador.value.toLowerCase().trim()
-        : "";
-
-    const filtradas = acciones
-        .map(function(accion, indice) {
-            return { accion: accion, indice: indice };
-        })
-        .filter(function(item) {
-            const a = item.accion;
-
-            return (
-                a.titulo.toLowerCase().includes(texto) ||
-                a.categoria.toLowerCase().includes(texto) ||
-                a.descripcion.toLowerCase().includes(texto)
-            );
-        });
+    contenedorAcciones.replaceChildren();
 
     if (filtradas.length === 0) {
-        contenedor.textContent =
-            "No se encontraron acciones.";
+        const mensaje = document.createElement("p");
+        mensaje.textContent = texto
+            ? "No se encontraron acciones."
+            : "Todavía no hay acciones registradas.";
+        contenedorAcciones.appendChild(mensaje);
         return;
     }
 
-    filtradas.forEach(function(item) {
-        const accion = item.accion;
-        const indice = item.indice;
-
+    filtradas.forEach(accion => {
         const tarjeta = document.createElement("article");
-        tarjeta.className = "accion";
+        tarjeta.className = "tarjeta-accion";
 
-        const titulo = document.createElement("h3");
-        const categoria = document.createElement("p");
-        const descripcion = document.createElement("p");
-        const autor = document.createElement("p");
-        const fecha = document.createElement("p");
+        const encabezado = document.createElement("h3");
+        encabezado.textContent = accion.titulo;
+        tarjeta.appendChild(encabezado);
+
+        const categoriaTexto = document.createElement("p");
+        categoriaTexto.textContent = "Categoría: " + accion.categoria;
+        tarjeta.appendChild(categoriaTexto);
+
+        if (accion.descripcion) {
+            agregarTexto(tarjeta, "Descripción: ", accion.descripcion);
+        }
+
+        if (accion.fecha) {
+            agregarTexto(tarjeta, "Fecha: ", accion.fecha);
+        }
+
+        if (accion.propuesto) {
+            agregarTexto(tarjeta, "Propuesto por: ", accion.propuesto);
+        }
+
+        if (accion.resultado) {
+            agregarTexto(tarjeta, "Resultado: ", accion.resultado);
+        }
+
         const botones = document.createElement("div");
+        botones.className = "botones-accion";
+
         const editar = document.createElement("button");
-        const eliminar = document.createElement("button");
-
-        titulo.textContent = accion.titulo;
-        categoria.textContent =
-            "Categoría: " + accion.categoria;
-        descripcion.textContent = accion.descripcion;
-        autor.textContent =
-            "Propuesto por: " + accion.propuesto;
-
-        fecha.textContent = accion.fecha
-            ? "Fecha: " + accion.fecha
-            : "Fecha no indicada";
-
-        botones.className = "acciones-botones";
-
-        editar.textContent = "Editar";
         editar.type = "button";
-        editar.className = "boton-editar";
+        editar.textContent = "Editar";
+        editar.addEventListener("click", () => prepararEdicion(accion));
 
-        eliminar.textContent = "Eliminar";
+        const eliminar = document.createElement("button");
         eliminar.type = "button";
-        eliminar.className = "boton-eliminar";
-
-        editar.addEventListener("click", function() {
-            document.getElementById("titulo").value =
-                accion.titulo;
-
-            document.getElementById("categoria").value =
-                accion.categoria;
-
-            document.getElementById("descripcion").value =
-                accion.descripcion;
-
-            document.getElementById("propuesto").value =
-                accion.propuesto;
-
-            const campoFecha = document.getElementById("fecha");
-            if (campoFecha) {
-                campoFecha.value = accion.fecha || "";
-            }
-
-            indiceEdicion = indice;
-
-            const botonGuardar = formulario.querySelector(
-                'button[type="submit"]'
-            );
-
-            if (botonGuardar) {
-                botonGuardar.textContent = "Guardar cambios";
-            }
-
-            if (resultado) {
-                resultado.textContent =
-                    "Edita los datos y guarda los cambios.";
-            }
-
-            formulario.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        });
-
-        eliminar.addEventListener("click", function() {
-            acciones.splice(indice, 1);
-            guardarAcciones();
-
-            if (indiceEdicion === indice) {
-                indiceEdicion = null;
-                formulario.reset();
-            }
-
-            mostrarAcciones();
-        });
+        eliminar.textContent = "Eliminar";
+        eliminar.addEventListener("click", () => eliminarAccion(accion.id));
 
         botones.append(editar, eliminar);
-
-        tarjeta.append(
-            titulo,
-            categoria,
-            descripcion,
-            autor,
-            fecha,
-            botones
-        );
-
-        contenedor.appendChild(tarjeta);
+        tarjeta.appendChild(botones);
+        contenedorAcciones.appendChild(tarjeta);
     });
 }
 
-if (formulario) {
-    formulario.addEventListener("submit", function(evento) {
-        evento.preventDefault();
+function agregarTexto(contenedor, etiqueta, valor) {
+    const parrafo = document.createElement("p");
+    const negrita = document.createElement("strong");
 
-        const campoFecha = document.getElementById("fecha");
-
-        const accion = {
-            titulo: document.getElementById("titulo").value.trim(),
-            categoria: document.getElementById("categoria").value,
-            descripcion: document.getElementById("descripcion").value.trim(),
-            propuesto: document.getElementById("propuesto").value.trim(),
-            fecha: campoFecha ? campoFecha.value : ""
-        };
-
-        if (
-            !accion.titulo ||
-            !accion.categoria ||
-            !accion.descripcion ||
-            !accion.propuesto
-        ) {
-            if (resultado) {
-                resultado.textContent =
-                    "Completa todos los campos.";
-            }
-            return;
-        }
-
-        if (indiceEdicion !== null) {
-            acciones[indiceEdicion] = accion;
-
-            if (resultado) {
-                resultado.textContent =
-                    "Acción actualizada correctamente.";
-            }
-
-            indiceEdicion = null;
-        } else {
-            acciones.push(accion);
-
-            if (resultado) {
-                resultado.textContent =
-                    "Acción registrada correctamente.";
-            }
-        }
-
-        guardarAcciones();
-        formulario.reset();
-
-        const botonGuardar = formulario.querySelector(
-            'button[type="submit"]'
-        );
-
-        if (botonGuardar) {
-            botonGuardar.textContent = "Guardar acción";
-        }
-
-        mostrarAcciones();
-    });
+    negrita.textContent = etiqueta;
+    parrafo.append(negrita, document.createTextNode(valor));
+    contenedor.appendChild(parrafo);
 }
 
-const buscador = document.getElementById("buscarAccion");
+function actualizarResumen() {
+    if (totalAcciones) {
+        totalAcciones.textContent = acciones.length;
+    }
 
-if (buscador) {
-    buscador.addEventListener("input", mostrarAcciones);
+    const cantidadAgua = acciones.filter(accion =>
+        (accion.categoria || "").toLowerCase() === "agua"
+    ).length;
+
+    if (totalAgua) {
+        totalAgua.textContent = cantidadAgua;
+    }
+
+    if (totalOtras) {
+        totalOtras.textContent = acciones.length - cantidadAgua;
+    }
 }
 
-mostrarAcciones();
+function prepararEdicion(accion) {
+    editandoId = accion.id;
+
+    titulo.value = accion.titulo || "";
+    categoria.value = accion.categoria || "";
+    descripcion.value = accion.descripcion || "";
+    fecha.value = accion.fecha || "";
+    propuesto.value = accion.propuesto || "";
+    resultado.value = accion.resultado || "";
+
+    if (btnGuardar) btnGuardar.textContent = "Actualizar acción";
+    if (btnCancelar) btnCancelar.hidden = false;
+
+    formulario?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function limpiarFormulario() {
+    formulario?.reset();
+    editandoId = null;
+
+    if (btnGuardar) btnGuardar.textContent = "Guardar acción";
+    if (btnCancelar) btnCancelar.hidden = true;
+}
+
+async function guardarAccion(evento) {
+    evento.preventDefault();
+
+    const datos = {
+        titulo: titulo.value.trim(),
+        categoria: categoria.value,
+        descripcion: descripcion.value.trim(),
+        fecha: fecha.value,
+        propuesto: propuesto.value.trim(),
+        resultado: resultado.value.trim()
+    };
+
+    if (!datos.titulo || !datos.categoria) {
+        alert("Escribe el título y selecciona una categoría.");
+        return;
+    }
+
+    try {
+        if (btnGuardar) btnGuardar.disabled = true;
+
+        if (editandoId !== null) {
+            // La ruta PUT se agregará al backend para habilitar la edición.
+            throw new Error(
+                "La edición todavía no está habilitada en el servidor. " +
+                "Por ahora puedes cancelar y registrar una acción nueva."
+            );
+        }
+
+        await consultarAPI("/api/acciones", {
+            method: "POST",
+            body: JSON.stringify(datos)
+        });
+
+        limpiarFormulario();
+        await cargarAcciones();
+        alert("¡Acción guardada en Neon correctamente!");
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "No se pudo guardar la acción.");
+    } finally {
+        if (btnGuardar) btnGuardar.disabled = false;
+    }
+}
+
+async function eliminarAccion(id) {
+    if (!confirm("¿Seguro que deseas eliminar esta acción?")) {
+        return;
+    }
+
+    try {
+        await consultarAPI(`/api/acciones/${id}`, {
+            method: "DELETE"
+        });
+
+        await cargarAcciones();
+        alert("Acción eliminada correctamente.");
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "No se pudo eliminar la acción.");
+    }
+}
+
+formulario?.addEventListener("submit", guardarAccion);
+btnCancelar?.addEventListener("click", limpiarFormulario);
+busqueda?.addEventListener("input", mostrarAcciones);
+
+if (btnCancelar) btnCancelar.hidden = true;
+
+cargarAcciones();
+
