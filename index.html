@@ -1,174 +1,87 @@
 
-import os
-from flask import Flask, render_template, jsonify, request
-import psycopg2
-from psycopg2.extras import RealDictCursor
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misión Eco-Reto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+<body>
+    <header class="encabezado">
+        <h1>🌿 Misión Eco-Reto</h1>
+        <p>Pequeñas acciones, grandes cambios para nuestro planeta.</p>
+    </header>
 
-app = Flask(
-    __name__,
-    template_folder=".",
-    static_folder=".",
-    static_url_path="/archivos"
-)
+    <main class="contenedor">
+        <section class="resumen">
+            <article class="tarjeta">
+                <h2 id="totalAcciones">0</h2>
+                <p>Acciones registradas</p>
+            </article>
+            <article class="tarjeta">
+                <h2 id="totalAgua">0</h2>
+                <p>Acciones sobre el agua</p>
+            </article>
+            <article class="tarjeta">
+                <h2 id="totalOtras">0</h2>
+                <p>Otras acciones</p>
+            </article>
+        </section>
 
+        <section class="panel">
+            <h2>🌎 Registra tu eco-acción</h2>
 
-def conectar_bd():
-    url = os.environ.get("DATABASE_URL")
+            <form id="formularioAccion">
+                <label for="titulo">Título de la acción *</label>
+                <input id="titulo" name="titulo" maxlength="150" required>
 
-    if not url:
-        raise RuntimeError(
-            "Falta configurar DATABASE_URL en Render."
-        )
+                <label for="categoria">Categoría *</label>
+                <select id="categoria" name="categoria" required>
+                    <option value="">Selecciona una categoría</option>
+                    <option value="Reciclaje">Reciclaje</option>
+                    <option value="Agua">Agua</option>
+                    <option value="Energia">Energía</option>
+                    <option value="Naturaleza">Naturaleza</option>
+                    <option value="Reutilizacion">Reutilización</option>
+                    <option value="Transporte">Transporte</option>
+                </select>
 
-    return psycopg2.connect(url)
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" name="descripcion" rows="3"></textarea>
 
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha">
 
-@app.route("/")
-def inicio():
-    return render_template("index.html")
+                <label for="propuesto">Propuesto por</label>
+                <input id="propuesto" name="propuesto" maxlength="100">
 
+                <label for="resultado">Resultado</label>
+                <textarea id="resultado" name="resultado" rows="3"></textarea>
 
-@app.route("/api/estado")
-def estado():
-    try:
-        with conectar_bd() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT 1")
+                <div class="botones">
+                    <button id="btnGuardar" type="submit">Guardar acción</button>
+                    <button id="btnCancelar" type="button" hidden>Cancelar</button>
+                </div>
+            </form>
+        </section>
 
-        return jsonify({
-            "mensaje": "Servidor y Neon conectados"
-        })
+        <section class="panel">
+            <h2>📋 Mis eco-acciones</h2>
+            <label for="busqueda">Buscar acción</label>
+            <input id="busqueda" type="search" placeholder="Escribe para buscar...">
+            <div id="contenedorAcciones">
+                <p>Cargando acciones...</p>
+            </div>
+        </section>
+    </main>
 
-    except Exception:
-        app.logger.exception("Error al conectar con Neon")
-        return jsonify({
-            "error": "No se pudo conectar con la base de datos"
-        }), 500
+    <footer>
+        <p>💚 Misión Eco-Reto | Cuidemos nuestro planeta.</p>
+    </footer>
 
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
 
-@app.route("/api/acciones", methods=["GET"])
-def obtener_acciones():
-    try:
-        with conectar_bd() as conn:
-            with conn.cursor(
-                cursor_factory=RealDictCursor
-            ) as cur:
-                cur.execute("""
-                    SELECT id, titulo, categoria, descripcion,
-                           fecha, propuesto, resultado, creado_en
-                    FROM acciones
-                    ORDER BY id DESC
-                """)
-
-                acciones = cur.fetchall()
-
-        for accion in acciones:
-            for campo, valor in accion.items():
-                if valor is not None and hasattr(
-                    valor, "isoformat"
-                ):
-                    accion[campo] = valor.isoformat()
-
-        return jsonify(acciones)
-
-    except Exception:
-        app.logger.exception("Error al consultar acciones")
-        return jsonify({
-            "error": "No se pudieron cargar las acciones"
-        }), 500
-
-
-@app.route("/api/acciones", methods=["POST"])
-def guardar_accion():
-    datos = request.get_json(silent=True)
-
-    if not isinstance(datos, dict):
-        return jsonify({
-            "error": "Envía los datos de la acción en formato JSON"
-        }), 400
-
-    titulo = str(datos.get("titulo") or "").strip()
-    categoria = str(datos.get("categoria") or "").strip()
-
-    if not titulo or not categoria:
-        return jsonify({
-            "error": "El título y la categoría son obligatorios"
-        }), 400
-
-    if len(titulo) > 150 or len(categoria) > 50:
-        return jsonify({
-            "error": "El título o la categoría son demasiado largos"
-        }), 400
-
-    descripcion = datos.get("descripcion") or None
-    fecha = datos.get("fecha") or None
-    propuesto = datos.get("propuesto") or None
-    resultado = datos.get("resultado") or None
-
-    try:
-        with conectar_bd() as conn:
-            with conn.cursor(
-                cursor_factory=RealDictCursor
-            ) as cur:
-                cur.execute("""
-                    INSERT INTO acciones
-                    (titulo, categoria, descripcion, fecha,
-                     propuesto, resultado)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id, titulo, categoria, descripcion,
-                              fecha, propuesto, resultado, creado_en
-                """, (
-                    titulo,
-                    categoria,
-                    descripcion,
-                    fecha,
-                    propuesto,
-                    resultado
-                ))
-
-                accion = cur.fetchone()
-
-        for campo, valor in accion.items():
-            if valor is not None and hasattr(
-                valor, "isoformat"
-            ):
-                accion[campo] = valor.isoformat()
-
-        return jsonify(accion), 201
-
-    except Exception:
-        app.logger.exception("Error al guardar la acción")
-        return jsonify({
-            "error": "No se pudo guardar la acción"
-        }), 500
-
-
-@app.route("/api/acciones/<int:accion_id>", methods=["DELETE"])
-def eliminar_accion(accion_id):
-    try:
-        with conectar_bd() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "DELETE FROM acciones WHERE id = %s",
-                    (accion_id,)
-                )
-
-                if cur.rowcount == 0:
-                    return jsonify({
-                        "error": "La acción no existe"
-                    }), 404
-
-        return jsonify({
-            "mensaje": "Acción eliminada correctamente"
-        })
-
-    except Exception:
-        app.logger.exception("Error al eliminar la acción")
-        return jsonify({
-            "error": "No se pudo eliminar la acción"
-        }), 500
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
 
